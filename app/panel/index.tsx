@@ -2,8 +2,8 @@ import colors from "@/constants/colors";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
   Image,
+  ImageSourcePropType,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,9 +19,11 @@ interface RankingItem {
 
 interface Mission {
   id: number;
-  icon: string;
   title: string;
   completed: boolean;
+  image: ImageSourcePropType;
+  objective: string;
+  reward: string;
 }
 
 const rankingData: RankingItem[] = [
@@ -32,24 +34,53 @@ const rankingData: RankingItem[] = [
 ];
 
 const missionsData: Mission[] = [
-  { id: 1, icon: "🥤", title: "Garrafa pet", completed: false },
-  { id: 2, icon: "🛢️", title: "Óleo", completed: false },
-  { id: 3, icon: "🧹", title: "Cabo de vassoura", completed: false },
-  { id: 4, icon: "☕", title: "Borra de café", completed: false },
+  {
+    id: 1,
+    title: "Garrafa pet",
+    completed: false,
+    image: require("../../assets/images/panel/bottle.png"),
+    objective: "Coletar 5 garrafas pets limpas e depositar no coletor",
+    reward: "$25,00",
+  },
+  {
+    id: 2,
+    title: "Óleo",
+    completed: false,
+    image: require("../../assets/images/panel/oil.png"),
+    objective:
+      "Coletar 3 galões de óleo usados e levar até o ponto de reciclagem",
+    reward: "$18,00",
+  },
+  {
+    id: 3,
+    title: "Cabo de vassoura",
+    completed: false,
+    image: require("../../assets/images/panel/broom.png"),
+    objective:
+      "Reunir 4 cabos de vassoura descartados e destinar ao centro de reciclagem",
+    reward: "$12,00",
+  },
+  {
+    id: 4,
+    title: "Borra de café",
+    completed: false,
+    image: require("../../assets/images/panel/coffee.png"),
+    objective: "Coletar 5 borras de café secas e entregar no coletor verde",
+    reward: "$10,00",
+  },
 ];
 
 export default function Home() {
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
+  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
 
   const handleMissionPress = (mission: Mission) => {
-    Alert.alert(`Missão: ${mission.title}`, "Deseja participar desta missão?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Participar",
-        onPress: () => console.log("Participando:", mission.title),
-      },
-    ]);
+    setSelectedMission(mission);
+  };
+
+  const closeMissionModal = () => {
+    setSelectedMission(null);
   };
 
   const handleLogout = () => {
@@ -118,6 +149,40 @@ export default function Home() {
         </View>
       </View>
 
+      {selectedMission && (
+        <View style={styles.popupOverlay} pointerEvents="box-none">
+          <TouchableOpacity
+            style={styles.popupBackdrop}
+            activeOpacity={1}
+            onPress={closeMissionModal}
+          />
+          <View style={styles.popupCard}>
+            <Text style={styles.popupTitle}>{selectedMission.title}</Text>
+            <Image style={styles.popupImage} source={selectedMission.image} />
+            <Text style={styles.popupLabel}>Objetivo:</Text>
+            <Text style={styles.popupDescription}>
+              {selectedMission.objective}
+            </Text>
+            <Text style={styles.popupReward}>
+              Recompensa: {selectedMission.reward}
+            </Text>
+            <TouchableOpacity style={styles.popupActionButton}>
+              <Text style={styles.popupActionButtonText}>
+                Código do coletor
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.popupActionButtonOutline}>
+              <Text style={styles.popupActionButtonOutlineText}>
+                Anexar foto
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.popupValidateButton}>
+              <Text style={styles.popupValidateButtonText}>Validar dados</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       {/* Balance and Badge */}
       <View style={styles.balanceContainer}>
         <View style={styles.balanceCard}>
@@ -162,7 +227,7 @@ export default function Home() {
                 onPress={() => handleMissionPress(mission)}
               >
                 <View style={styles.missionContent}>
-                  <Text style={styles.missionIcon}>{mission.icon}</Text>
+                  <Image style={styles.missionImage} source={mission.image} />
                   <Text style={styles.missionTitle}>{mission.title}</Text>
                 </View>
               </TouchableOpacity>
@@ -384,12 +449,110 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  missionIcon: {
-    fontSize: 28,
+  missionImage: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+    backgroundColor: "transparent",
   },
   missionTitle: {
     fontSize: 16,
     fontWeight: "600",
     color: colors.darkGreen,
+  },
+  popupOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 200,
+  },
+  popupBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+  },
+  popupCard: {
+    width: "85%",
+    backgroundColor: colors.buttonOrange,
+    borderRadius: 20,
+    padding: 22,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 16,
+    position: "relative",
+  },
+  popupClose: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    padding: 6,
+  },
+  popupCloseText: {
+    fontSize: 18,
+    color: colors.white,
+  },
+  popupTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.darkGreen,
+    marginBottom: 12,
+  },
+  popupImage: {
+    width: 100,
+    height: 100,
+    alignSelf: "center",
+    marginBottom: 16,
+    resizeMode: "contain",
+  },
+  popupLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.darkGreen,
+    marginBottom: 6,
+  },
+  popupDescription: {
+    fontSize: 15,
+    color: colors.darkGreen,
+    lineHeight: 22,
+    marginBottom: 14,
+  },
+  popupReward: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: colors.white,
+    marginBottom: 18,
+  },
+  popupActionButton: {
+    backgroundColor: colors.white,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  popupActionButtonText: {
+    color: colors.darkGreen,
+    fontWeight: "700",
+  },
+  popupActionButtonOutline: {
+    backgroundColor: colors.lightGreen,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  popupActionButtonOutlineText: {
+    color: colors.darkGreen,
+    fontWeight: "700",
+  },
+  popupValidateButton: {
+    backgroundColor: colors.lightGreen,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  popupValidateButtonText: {
+    color: colors.darkGreen,
+    fontWeight: "700",
   },
 });
