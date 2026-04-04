@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -33,7 +34,7 @@ const rankingData: RankingItem[] = [
 const missionsData: Mission[] = [
   { id: 1, icon: "🥤", title: "Garrafa pet", completed: false },
   { id: 2, icon: "🛢️", title: "Óleo", completed: false },
-  { id: 3, icon: "🔌", title: "Cabo de vassoura", completed: false },
+  { id: 3, icon: "🧹", title: "Cabo de vassoura", completed: false },
   { id: 4, icon: "☕", title: "Borra de café", completed: false },
 ];
 
@@ -66,7 +67,10 @@ export default function Home() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.logo}>⚖️</Text>
+          <Image
+            style={styles.logoIcon}
+            source={require("../../assets/images/panel/justice.png")}
+          />
           <Text style={styles.headerTitle}>ECOARTIA</Text>
         </View>
         <TouchableOpacity onPress={() => setMenuVisible(true)}>
@@ -180,7 +184,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingVertical: 20,
+    paddingTop: 40,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.gray,
@@ -193,8 +198,12 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 28,
   },
+  logoIcon: {
+    width: 50,
+    height: 50,
+  },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 34,
     fontWeight: "bold",
     color: colors.darkGreen,
   },
