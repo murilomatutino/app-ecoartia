@@ -2,6 +2,7 @@ import colors from "@/constants/colors";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -29,11 +30,10 @@ export default function login() {
     <View style={styles.container}>
       {/* Logo e Título */}
       <View style={styles.logoContainer}>
-        <Text style={styles.logoIcon}>⚖️</Text>
-        <Text style={styles.title}>ECOARTIA</Text>
-        <Text style={styles.subtitle}>
-          Tecnologia a serviço da justiça ambiental
-        </Text>
+        <Image
+          style={styles.logoIcon}
+          source={require("../assets/images/logo.png")}
+        />
       </View>
 
       {/* Formulário */}
@@ -76,19 +76,8 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   },
   logoIcon: {
-    fontSize: 60,
-    marginBottom: 15,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: colors.darkGreen,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: colors.darkGreen,
-    opacity: 0.7,
+    width: 320,
+    height: 320,
   },
   formContainer: {
     width: "100%",

@@ -2,12 +2,12 @@ import colors from "@/constants/colors";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface RankingItem {
@@ -85,7 +85,10 @@ export default function Home() {
 
       {/* Drawer Menu */}
       <View
-        style={[styles.drawer, menuVisible ? styles.drawerOpen : styles.drawerClosed]}
+        style={[
+          styles.drawer,
+          menuVisible ? styles.drawerOpen : styles.drawerClosed,
+        ]}
         pointerEvents={menuVisible ? "auto" : "none"}
       >
         <TouchableOpacity
