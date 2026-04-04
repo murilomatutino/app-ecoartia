@@ -1,4 +1,5 @@
 import colors from "@/constants/colors";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -7,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -74,13 +76,39 @@ export default function Home() {
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
+  const [collectorCode, setCollectorCode] = useState("");
+  const [selectedPhotoUri, setSelectedPhotoUri] = useState<string | null>(null);
 
   const handleMissionPress = (mission: Mission) => {
+    setCollectorCode("");
+    setSelectedPhotoUri(null);
     setSelectedMission(mission);
+  };
+
+  const handleSelectPhoto = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("Permissão para acessar fotos é necessária.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets?.length) {
+      setSelectedPhotoUri(result.assets[0].uri);
+    }
   };
 
   const closeMissionModal = () => {
     setSelectedMission(null);
+    setCollectorCode("");
+    setSelectedPhotoUri(null);
   };
 
   const handleLogout = () => {
@@ -166,15 +194,26 @@ export default function Home() {
             <Text style={styles.popupReward}>
               Recompensa: {selectedMission.reward}
             </Text>
-            <TouchableOpacity style={styles.popupActionButton}>
-              <Text style={styles.popupActionButtonText}>
-                Código do coletor
+            <TextInput
+              style={styles.popupTextInput}
+              placeholder="Código do coletor"
+              placeholderTextColor={colors.darkGreen}
+              value={collectorCode}
+              onChangeText={setCollectorCode}
+            />
+            <TouchableOpacity
+              style={styles.popupPhotoInput}
+              onPress={handleSelectPhoto}
+            >
+              <Text style={styles.popupPhotoInputText}>
+                {selectedPhotoUri ? "Foto anexada" : "Anexar foto"}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.popupActionButtonOutline}>
-              <Text style={styles.popupActionButtonOutlineText}>
-                Anexar foto
-              </Text>
+              {selectedPhotoUri ? (
+                <Image
+                  style={styles.popupPhotoPreview}
+                  source={{ uri: selectedPhotoUri }}
+                />
+              ) : null}
             </TouchableOpacity>
             <TouchableOpacity style={styles.popupValidateButton}>
               <Text style={styles.popupValidateButtonText}>Validar dados</Text>
@@ -523,27 +562,45 @@ const styles = StyleSheet.create({
     color: colors.white,
     marginBottom: 18,
   },
-  popupActionButton: {
+  popupTextInput: {
     backgroundColor: colors.white,
-    paddingVertical: 14,
     borderRadius: 14,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  popupActionButtonText: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 12,
     color: colors.darkGreen,
-    fontWeight: "700",
+    borderWidth: 1,
+    borderColor: colors.beige,
   },
-  popupActionButtonOutline: {
-    backgroundColor: colors.lightGreen,
-    paddingVertical: 14,
+  popupPhotoInput: {
+    backgroundColor: colors.white,
     borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.beige,
+    minHeight: 72,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 14,
   },
-  popupActionButtonOutlineText: {
+  popupPhotoInputText: {
+    fontSize: 15,
     color: colors.darkGreen,
+    fontWeight: "600",
+  },
+  popupPhotoPreview: {
+    marginTop: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.lightBeige,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  popupPhotoPreviewText: {
+    fontSize: 18,
     fontWeight: "700",
+    color: colors.darkGreen,
   },
   popupValidateButton: {
     backgroundColor: colors.lightGreen,
