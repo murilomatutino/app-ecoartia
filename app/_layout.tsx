@@ -7,7 +7,10 @@ export default function MainLayout() {
       <Stack.Screen name="loading" options={{ headerShown: false }} />
       <Stack.Screen name="panel/index" options={{ headerShown: false }} />
       <Stack.Screen name="cadastro" options={{ headerShown: false }} />
-
+      <Stack.Screen
+        name="panel/profile/page"
+        options={{ headerShown: true, title: "Meu Perfil" }}
+      />
     </Stack>
   );
 }

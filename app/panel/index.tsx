@@ -120,13 +120,13 @@ export default function Home() {
     } else {
       // Aqui você pode redirecionar o usuário para a tela de login
       console.log("Usuário deslogado com sucesso!");
+      router.replace("/");
     }
-    router.replace("/");
   };
 
   const handleProfile = () => {
     setMenuVisible(false);
-    router.push({ pathname: "/panel/profile" } as any);
+    router.push({ pathname: "/panel/profile/page" } as any);
   };
 
   return (
