@@ -9,33 +9,57 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  
 } from "react-native";
 import { supabase } from "../lib/supabase";
+import { Background } from "@react-navigation/elements";
 
-export default function login() {
+export default function Cadastro() {
   const [login, setLogin] = useState("");
+  const [nome, setNome] = useState("");
+  const [escola, setEscola] = useState("");
   const [senha, setSenha] = useState("");
   const router = useRouter();
-
-  async function handleLogin() {
   
-   const { data, error } = await supabase.auth.signInWithPassword({
-     email: login,
-     password: senha,
-    })
-    
-    if (error) {
-      Alert.alert("Erro", "Erro: " + error.message);
-      console.log(error.message);
-      return;
-    }
-    
-    router.push("/panel");
-  };
+const [show, setShow] = useState(false);
 
-  function cadastro() {
-    router.push("/cadastro");
-  }
+  async function handleCadastro() {
+      
+    if (!(login && nome && escola && senha)) {
+      setShow(true);
+      return
+    }
+
+    const { error, data } = await supabase.auth.signUp ({
+      email: login,
+      password: senha,
+      
+    },
+    
+)
+
+    if (error) Alert.alert(error.message)
+    if (!data) Alert.alert('Email de verificação enviado')
+    
+    // await supabase.auth.getSession();
+    if (data?.user?.id) {
+      const user_id = data.user.id;
+      
+      const { data: insertData, error: insertError } = await supabase
+      .from('membro_comvida')
+      .insert({id_membro: user_id, id_comvida: 1, nome: nome, email: login, id_escola: parseInt(escola)});
+    }
+
+      if (error) {
+        console.error(error.code + " " + error.message);
+        Alert.alert("Erro", error.code + " " + error.message);
+      return ("error");
+    } else {
+        router.replace("/")
+        return "success";
+    }
+
+  };
 
   return (
     <View style={styles.container}>
@@ -49,6 +73,27 @@ export default function login() {
 
       {/* Formulário */}
       <View style={styles.formContainer}>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Nome completo"
+          placeholderTextColor="#999"
+          value={nome}
+          onChangeText={setNome}
+          
+        />
+
+      <select
+        name="escola"
+        id="escola"
+        style={styles.input}
+        value={escola}                    // make it controlled
+        onChange={e => setEscola(e.target.value)} // update state
+      >
+        <option value="1">escola1</option>
+        <option value="2">escola2</option>
+      </select>
+
         <TextInput
           style={styles.input}
           placeholder="Login"
@@ -66,11 +111,13 @@ export default function login() {
           onChangeText={setSenha}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
-        </TouchableOpacity>
+        {show && (
+        <Text style={styles.aviso}>
+          Há campos vazios!
+        </Text>
+      )}
 
-          <TouchableOpacity style={styles.button} onPress={cadastro}>
+        <TouchableOpacity style={styles.button} onPress={handleCadastro}>
           <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
       </View>
@@ -118,4 +165,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  aviso: {
+    color: colors.buttonOrange
+  }
+  
 });
