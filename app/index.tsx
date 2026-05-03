@@ -18,20 +18,19 @@ export default function login() {
   const router = useRouter();
 
   async function handleLogin() {
-  
-   const { data, error } = await supabase.auth.signInWithPassword({
-     email: login,
-     password: senha,
-    })
-    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: login,
+      password: senha,
+    });
+
     if (error) {
       Alert.alert("Erro", "Erro: " + error.message);
       console.log(error.message);
       return;
     }
-    
+
     router.push("/panel");
-  };
+  }
 
   function cadastro() {
     router.push("/cadastro");
@@ -70,8 +69,8 @@ export default function login() {
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button} onPress={cadastro}>
-          <Text style={styles.buttonText}>Cadastrar</Text>
+        <TouchableOpacity style={styles.button_cadastro} onPress={cadastro}>
+          <Text style={styles.buttonText_cadastro}>Cadastrar</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -114,6 +113,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   buttonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  button_cadastro: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText_cadastro: {
     color: colors.white,
     fontSize: 16,
     fontWeight: "bold",

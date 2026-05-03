@@ -1,4 +1,5 @@
 import colors from "@/constants/colors";
+import { supabase } from "@/lib/supabase";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -111,8 +112,15 @@ export default function Home() {
     setSelectedPhotoUri(null);
   };
 
-  const handleLogout = () => {
-    setMenuVisible(false);
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error("Erro ao sair:", error.message);
+    } else {
+      // Aqui você pode redirecionar o usuário para a tela de login
+      console.log("Usuário deslogado com sucesso!");
+    }
     router.replace("/");
   };
 

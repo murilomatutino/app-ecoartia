@@ -75,6 +75,7 @@ export default function Cadastro() {
       Alert.alert("Erro", error.code + " " + error.message);
       return "error";
     } else {
+      Alert.alert("Sucesso", "Cadastro realizado com sucesso!");
       router.replace("/");
       return "success";
     }
