@@ -1,7 +1,7 @@
 import colors from "@/constants/colors";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -13,17 +13,37 @@ import {
 } from "react-native";
 import { supabase } from "../lib/supabase";
 
+interface Comvida {
+  id_comvida: number;
+  nome: string;
+}
+
 export default function Cadastro() {
   const [login, setLogin] = useState("");
   const [nome, setNome] = useState("");
-  const [escola, setEscola] = useState("");
+  const [comvida, setComvida] = useState("");
   const [senha, setSenha] = useState("");
   const router = useRouter();
-
   const [show, setShow] = useState(false);
 
+  const [comvidas, setComvidas] = useState<Comvida[]>([]);
+
+  useEffect(() => {
+    fetchComvidas();
+  }, []);
+
+  async function fetchComvidas() {
+    const { data, error } = await supabase.from("comvida").select("*");
+
+    if (error) {
+      console.error("Erro ao buscar comvidas:", error);
+    } else {
+      setComvidas(data);
+    }
+  }
+
   async function handleCadastro() {
-    if (!(login && nome && escola && senha)) {
+    if (!(login && nome && comvida && senha)) {
       setShow(true);
       return;
     }
@@ -44,10 +64,9 @@ export default function Cadastro() {
         .from("membro_comvida")
         .insert({
           id_membro: user_id,
-          id_comvida: 1,
           nome: nome,
           email: login,
-          id_escola: parseInt(escola),
+          id_comvida: parseInt(comvida),
         });
     }
 
@@ -83,11 +102,17 @@ export default function Cadastro() {
 
         <Picker
           style={styles.input}
-          selectedValue={escola}
-          onValueChange={(value) => setEscola(value as string)}
+          selectedValue={comvida}
+          onValueChange={(value) => setComvida(value as string)}
         >
-          <Picker.Item label="Escola 1" value="1" />
-          <Picker.Item label="Escola 2" value="2" />
+          <Picker.Item label="Selecione uma Comvida" value="" />
+          {comvidas.map((item) => (
+            <Picker.Item
+              key={item.id_comvida}
+              label={item.nome}
+              value={item.id_comvida.toString()}
+            />
+          ))}
         </Picker>
 
         <TextInput
