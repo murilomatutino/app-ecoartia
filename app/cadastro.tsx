@@ -1,10 +1,12 @@
 import colors from "@/constants/colors";
-import { Picker } from "@react-native-picker/picker";
+
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  FlatList,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TextInput,
@@ -27,6 +29,7 @@ export default function Cadastro() {
   const [show, setShow] = useState(false);
 
   const [comvidas, setComvidas] = useState<Comvida[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     fetchComvidas();
@@ -101,20 +104,16 @@ export default function Cadastro() {
           onChangeText={setNome}
         />
 
-        <Picker
-          style={styles.input}
-          selectedValue={comvida}
-          onValueChange={(value) => setComvida(value as string)}
+        <TouchableOpacity
+          style={styles.pickerButton}
+          onPress={() => setModalVisible(true)}
         >
-          <Picker.Item label="Selecione uma Comvida" value="" />
-          {comvidas.map((item) => (
-            <Picker.Item
-              key={item.id_comvida}
-              label={item.nome}
-              value={item.id_comvida.toString()}
-            />
-          ))}
-        </Picker>
+          <Text style={styles.pickerText}>
+            {comvida
+              ? comvidas.find((c) => c.id_comvida.toString() === comvida)?.nome
+              : "Selecione uma Comvida"}
+          </Text>
+        </TouchableOpacity>
 
         <TextInput
           style={styles.input}
@@ -139,6 +138,40 @@ export default function Cadastro() {
           <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Selecione uma Comvida</Text>
+            <FlatList
+              data={comvidas}
+              keyExtractor={(item) => item.id_comvida.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.modalItem}
+                  onPress={() => {
+                    setComvida(item.id_comvida.toString());
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalItemText}>{item.nome}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalCloseText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -185,5 +218,58 @@ const styles = StyleSheet.create({
   },
   aviso: {
     color: colors.buttonOrange,
+  },
+  pickerButton: {
+    backgroundColor: colors.white,
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginBottom: 15,
+    justifyContent: "center",
+  },
+  pickerText: {
+    fontSize: 16,
+    color: colors.darkGreen,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    padding: 20,
+    width: "80%",
+    maxHeight: "60%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.darkGreen,
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  modalItem: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.lightGreen,
+  },
+  modalItemText: {
+    fontSize: 16,
+    color: colors.darkGreen,
+  },
+  modalCloseButton: {
+    marginTop: 20,
+    backgroundColor: colors.buttonOrange,
+    borderRadius: 25,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  modalCloseText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
