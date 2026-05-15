@@ -1,8 +1,10 @@
 import colors from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import * as Crypto from "expo-crypto";
 import {
   Image,
   ImageSourcePropType,
@@ -105,6 +107,72 @@ export default function Home() {
       setSelectedPhotoUri(result.assets[0].uri);
     }
   };
+
+  async function toWebP(uri: string, quality = 0.8): Promise<string> {
+    const image =
+      await ImageManipulator.ImageManipulator.manipulate(uri).renderAsync();
+    const result = await image.saveAsync({
+      compress: quality,
+      format: ImageManipulator.SaveFormat.WEBP,
+      base64: false,
+    });
+
+    return result.uri;
+  }
+
+  async function uploadImage(
+    file_uri: string,
+    id_membro: string,
+  ): Promise<string> {
+    try {
+      const webp_uri = await toWebP(file_uri);
+      const response = await fetch(webp_uri);
+
+      if (!response.ok) throw new Error("Erro ao buscar arquivo");
+
+      const blob = await response.blob();
+      const image_name: string = Crypto.randomUUID();
+      const { error } = await supabase.storage
+        .from("registros-bucket")
+        .upload(`${id_membro}/${image_name}`, blob, {
+          contentType: "image/webp",
+        });
+
+      if (error) throw error;
+      return image_name;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  }
+
+  async function registrarColeta(): Promise<void> {
+    if (!selectedPhotoUri) return;
+
+    const { data, error: userErr } = await supabase.auth.getUser();
+    if (userErr) throw userErr;
+
+    const id_membro = data?.user?.id;
+
+    const image_name = await uploadImage(selectedPhotoUri, id_membro);
+    if (!image_name) throw new Error("Imagem inválida");
+
+    try {
+      const { error: insertError } = await supabase
+        .from("registro_coleta")
+        .insert({
+          id_membro: id_membro,
+          imagem: image_name,
+          id_coletor: parseInt(collectorCode),
+        });
+
+      if (insertError) throw insertError;
+    } catch (e) {
+      throw e;
+    } finally {
+      closeMissionModal();
+    }
+  }
 
   const closeMissionModal = () => {
     setSelectedMission(null);
@@ -223,7 +291,10 @@ export default function Home() {
                 />
               ) : null}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.popupValidateButton}>
+            <TouchableOpacity
+              style={styles.popupValidateButton}
+              onPress={registrarColeta}
+            >
               <Text style={styles.popupValidateButtonText}>Validar dados</Text>
             </TouchableOpacity>
           </View>
