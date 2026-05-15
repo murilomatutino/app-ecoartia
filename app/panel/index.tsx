@@ -1,6 +1,7 @@
 import colors from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import * as Crypto from "expo-crypto";
@@ -107,9 +108,25 @@ export default function Home() {
     }
   };
 
-  async function uploadImage(file_uri: string, id_membro: string) {
+  async function toWebP(uri: string, quality = 0.8): Promise<string> {
+    const image =
+      await ImageManipulator.ImageManipulator.manipulate(uri).renderAsync();
+    const result = await image.saveAsync({
+      compress: quality,
+      format: ImageManipulator.SaveFormat.WEBP,
+      base64: false,
+    });
+
+    return result.uri;
+  }
+
+  async function uploadImage(
+    file_uri: string,
+    id_membro: string,
+  ): Promise<string> {
     try {
-      const response = await fetch(file_uri);
+      const webp_uri = await toWebP(file_uri);
+      const response = await fetch(webp_uri);
 
       if (!response.ok) throw new Error("Erro ao buscar arquivo");
 
@@ -117,7 +134,9 @@ export default function Home() {
       const image_name: string = Crypto.randomUUID();
       const { error } = await supabase.storage
         .from("registros-bucket")
-        .upload(`${id_membro}/${image_name}`, blob);
+        .upload(`${id_membro}/${image_name}`, blob, {
+          contentType: "image/webp",
+        });
 
       if (error) throw error;
       return image_name;
